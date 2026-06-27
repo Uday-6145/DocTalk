@@ -11,236 +11,185 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 
+# ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="DocTalk",
-    page_icon="⚡",
+    page_title="DocTalk — Ask Your Documents",
+    page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# ── Design System ──────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-*, html, body, [class*="css"] {
-    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+html, body, [class*="css"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    letter-spacing: -0.01em;
 }
 
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu { visibility: hidden; }
+footer    { visibility: hidden; }
+header    { visibility: hidden; }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background-color: #09090B !important;
-    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    background-color: #0F172A !important;
+    border-right: 1px solid #1E293B !important;
 }
 [data-testid="stSidebar"] p,
+[data-testid="stSidebar"] li,
 [data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div,
-[data-testid="stSidebar"] label { color: #71717A !important; }
-[data-testid="stSidebar"] strong,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] small,
+[data-testid="stSidebar"] div { color: #94A3B8 !important; }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 { color: #FAFAFA !important; }
-[data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.06) !important; }
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] strong { color: #F1F5F9 !important; }
+[data-testid="stSidebar"] hr { border-color: #1E293B !important; }
+
+/* Upload area in sidebar */
 [data-testid="stSidebar"] [data-testid="stFileUploader"] {
-    background: rgba(255,255,255,0.02) !important;
-    border: 1.5px dashed rgba(124,58,237,0.4) !important;
-    border-radius: 10px !important;
-    transition: border-color 0.2s;
-}
-[data-testid="stSidebar"] [data-testid="stFileUploader"]:hover {
-    border-color: rgba(124,58,237,0.8) !important;
+    background: rgba(255,255,255,0.04) !important;
+    border: 1.5px dashed #334155 !important;
+    border-radius: 8px !important;
 }
 [data-testid="stSidebar"] [data-testid="stFileUploader"] button {
-    background: linear-gradient(135deg, #7C3AED, #06B6D4) !important;
+    background: #2563EB !important;
     color: white !important;
     border: none !important;
     border-radius: 6px !important;
-    font-weight: 500 !important;
     font-size: 0.8rem !important;
 }
-[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] {
-    background: rgba(255,255,255,0.04) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    color: #71717A !important;
-    border-radius: 6px !important;
-    font-size: 0.78rem !important;
-    transition: all 0.15s !important;
+
+/* Doc tag pills */
+.doc-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(37,99,235,0.15);
+    border: 1px solid rgba(37,99,235,0.3);
+    color: #93C5FD !important;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    margin: 3px 0;
 }
-[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"]:hover {
-    background: rgba(255,255,255,0.08) !important;
-    color: #FAFAFA !important;
+.doc-tag-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #3B82F6;
 }
 
-/* ── Main ── */
+/* ── Main content ── */
 .block-container {
     padding-top: 2rem !important;
-    max-width: 820px !important;
+    max-width: 860px !important;
 }
 
-/* ── Gradient wordmark ── */
-.wordmark {
-    font-size: 1.4rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.04em;
-    display: inline-block;
-}
-.tagline {
-    font-size: 0.8rem;
-    color: #52525B;
-    letter-spacing: 0.01em;
-}
+/* ── Header ── */
 .app-header {
     display: flex;
     align-items: baseline;
-    gap: 12px;
+    gap: 10px;
     padding-bottom: 1.25rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid rgba(148,163,184,0.1);
+    border-bottom: 1px solid rgba(148,163,184,0.15);
 }
-.header-divider {
-    width: 1px;
-    height: 16px;
-    background: rgba(148,163,184,0.2);
-    display: inline-block;
-    vertical-align: middle;
+.app-wordmark {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2563EB;
+    letter-spacing: -0.03em;
+}
+.app-tagline {
+    font-size: 0.82rem;
+    color: #64748B;
 }
 
-/* ── Status ── */
-.status {
+/* ── Empty state ── */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #64748B;
+}
+.empty-state-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #94A3B8;
+    margin-bottom: 0.5rem;
+}
+.empty-state-sub {
+    font-size: 0.85rem;
+    color: #64748B;
+    line-height: 1.6;
+}
+
+/* ── Status badge ── */
+.status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 4px 12px;
+    gap: 6px;
+    padding: 3px 10px;
     border-radius: 20px;
     font-size: 0.72rem;
     font-weight: 500;
-    background: rgba(124,58,237,0.1);
-    border: 1px solid rgba(124,58,237,0.25);
-    color: #A78BFA;
-    margin-bottom: 1.25rem;
+    background: rgba(34,197,94,0.1);
+    color: #86EFAC;
+    border: 1px solid rgba(34,197,94,0.2);
+    margin-bottom: 1rem;
 }
 .status-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #8B5CF6;
-    animation: blink 2s infinite;
+    background: #22C55E;
+    animation: pulse 2s infinite;
 }
-@keyframes blink {
-    0%,100% { opacity: 1; }
-    50%      { opacity: 0.3; }
-}
-
-/* ── Empty state ── */
-.empty-wrap {
-    margin-top: 4rem;
-    text-align: center;
-}
-.empty-title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #3F3F46;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
-}
-.empty-sub {
-    font-size: 0.85rem;
-    color: #52525B;
-    line-height: 1.7;
-    max-width: 380px;
-    margin: 0 auto;
-}
-.empty-examples {
-    margin-top: 2rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-}
-.example-chip {
-    background: rgba(124,58,237,0.08);
-    border: 1px solid rgba(124,58,237,0.2);
-    color: #A78BFA;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.78rem;
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
 }
 
 /* ── Chat messages ── */
 [data-testid="stChatMessage"] {
-    border-radius: 12px !important;
-    border: 1px solid rgba(148,163,184,0.1) !important;
-    padding: 1rem !important;
-    margin-bottom: 0.5rem !important;
-    background: transparent !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(148,163,184,0.15) !important;
+    padding: 0.9rem 1rem !important;
+    margin-bottom: 0.6rem !important;
 }
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    border-left: 3px solid #7C3AED !important;
-    background: rgba(124,58,237,0.04) !important;
+    border-left: 3px solid #2563EB !important;
+    background: rgba(37,99,235,0.04) !important;
 }
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {
-    border-left: 3px solid rgba(6,182,212,0.4) !important;
+    border-left: 3px solid rgba(148,163,184,0.25) !important;
 }
 
-/* ── Input ── */
-[data-testid="stChatInput"] {
-    border-radius: 10px !important;
-    font-family: 'Space Grotesk', sans-serif !important;
-}
-[data-testid="stChatInput"] textarea {
-    font-size: 0.88rem !important;
-    font-family: 'Space Grotesk', sans-serif !important;
-}
-
-/* ── Expander (sources) ── */
+/* ── Source expander ── */
 [data-testid="stExpander"] {
-    border: 1px solid rgba(148,163,184,0.1) !important;
-    border-radius: 8px !important;
-    margin-top: 0.4rem !important;
+    border: 1px solid rgba(148,163,184,0.15) !important;
+    border-radius: 6px !important;
+    margin-top: 0.5rem !important;
 }
 [data-testid="stExpander"] summary {
-    font-size: 0.72rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
     text-transform: uppercase !important;
-    color: #52525B !important;
-}
-
-/* ── Doc pill ── */
-.doc-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(124,58,237,0.1);
-    border: 1px solid rgba(124,58,237,0.25);
-    color: #A78BFA !important;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.74rem;
-    font-weight: 500;
-    margin: 3px 0;
-    width: 100%;
-}
-.dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #8B5CF6;
-    flex-shrink: 0;
+    letter-spacing: 0.05em !important;
 }
 
 /* ── Sidebar label ── */
-.s-label {
-    font-size: 0.65rem;
+.sidebar-label {
+    font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #3F3F46;
+    color: #475569;
     display: block;
     margin-bottom: 0.6rem;
 }
@@ -248,13 +197,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ── Helpers ───────────────────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────────────────────
 def get_api_key():
     try:
         return st.secrets["GROQ_API_KEY"]
     except Exception:
         return os.environ.get("GROQ_API_KEY", "")
 
+
+# ── Cache heavy objects globally (model downloads once) ────────────────────────
 @st.cache_resource
 def get_embeddings():
     return HuggingFaceEmbeddings(
@@ -273,8 +224,15 @@ def get_llm():
     )
 
 
-def build_pipeline(uploaded_files):
+# ── Build per-session pipeline when files change ───────────────────────────────
+def build_pipeline_from_files(uploaded_files):
+    """
+    Processes uploaded PDFs and returns a retriever + answer chain.
+    Caches in session_state so it doesn't reprocess on every rerun.
+    """
+    # Use file names + sizes as a cache key
     file_key = "_".join(f"{f.name}_{f.size}" for f in uploaded_files)
+
     if st.session_state.get("file_key") == file_key:
         return (
             st.session_state["retriever"],
@@ -282,201 +240,206 @@ def build_pipeline(uploaded_files):
             st.session_state["doc_names"]
         )
 
-    all_docs, doc_names = [], []
+    # Load PDFs via temp files
+    all_docs = []
+    doc_names = []
     for uf in uploaded_files:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        suffix = Path(uf.name).suffix
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(uf.read())
             tmp_path = tmp.name
         loader = PyPDFLoader(tmp_path)
         pages  = loader.load()
-        name   = uf.name.replace(".pdf", "").replace("_", " ")
         for pg in pages:
-            pg.metadata["doc_name"] = name
+            pg.metadata["doc_name"] = uf.name.replace(".pdf", "").replace("_", " ")
         all_docs.extend(pages)
-        doc_names.append(name)
+        doc_names.append(uf.name.replace(".pdf", "").replace("_", " "))
         os.unlink(tmp_path)
 
-    chunks = RecursiveCharacterTextSplitter(
-        chunk_size=1000, chunk_overlap=200,
+    # Chunk
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200,
         separators=["\n\n", "\n", ". ", " ", ""]
-    ).split_documents(all_docs)
+    )
+    chunks = splitter.split_documents(all_docs)
 
-    vs = FAISS.from_documents(chunks, get_embeddings())
-    retriever = vs.as_retriever(
+    # Embed and index
+    vectorstore = FAISS.from_documents(chunks, get_embeddings())
+    retriever   = vectorstore.as_retriever(
         search_type="mmr",
         search_kwargs={"k": 8, "fetch_k": 30, "lambda_mult": 0.7}
     )
 
+    # Generic RAG prompt — works for any document type
     RAG_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", """You are a sharp, precise document assistant.
-Answer using ONLY the information in the context below.
+        ("system", """You are a precise document assistant.
+Answer the user's question using ONLY the information in the provided document context below.
 
-Rules:
-1. Get straight to the answer — no "Based on the document" or "According to...". Just facts.
-2. Include every exact number, date, name, or figure from the context.
-3. Bullet points for lists or multi-step things.
-4. If the answer genuinely isn't in the documents, say exactly:
-   "not in your docs — try asking something else."
-5. Never make things up.
+RULES:
+1. Start directly with the answer — no preamble like "According to the document" or "Based on the context".
+2. Include every specific number, date, percentage, or figure mentioned in the context.
+3. Use bullet points for multi-part answers, lists, or step-by-step processes.
+4. If the answer is not in the context, respond with exactly:
+   "This information is not covered in the uploaded documents."
+5. Never guess or add information from outside the provided context.
 
 Context:
 {context}"""),
         ("human", "{question}")
     ])
 
-    chain = RAG_PROMPT | get_llm() | StrOutputParser()
+    llm   = get_llm()
+    chain = RAG_PROMPT | llm | StrOutputParser()
 
-    st.session_state.update({
-        "file_key": file_key,
-        "retriever": retriever,
-        "chain": chain,
-        "doc_names": doc_names
-    })
+    # Store in session
+    st.session_state["file_key"]  = file_key
+    st.session_state["retriever"] = retriever
+    st.session_state["chain"]     = chain
+    st.session_state["doc_names"] = doc_names
+
     return retriever, chain, doc_names
 
 
 def format_docs(docs):
-    return "\n\n---\n\n".join(d.page_content for d in docs)
+    return "\n\n---\n\n".join(doc.page_content for doc in docs)
+
 
 def ask(question, retriever, chain):
     docs    = retriever.invoke(question)
     context = format_docs(docs)
     sources = list({
-        d.metadata.get("doc_name",
-            os.path.basename(d.metadata.get("source", "")).replace(".pdf",""))
+        d.metadata.get("doc_name", os.path.basename(d.metadata.get("source", "")))
         for d in docs
     })
-    return chain.invoke({"context": context, "question": question}), sources
+    answer = chain.invoke({"context": context, "question": question})
+    return answer, sources
 
 
-# ── Sidebar ───────────────────────────────────────────────────────────
+# ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-        <div style="padding:.25rem 0 1.5rem">
-            <div style="font-size:1.1rem;font-weight:700;
-                        background:linear-gradient(135deg,#7C3AED,#06B6D4);
-                        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                        background-clip:text;letter-spacing:-.03em">
-                DocTalk ⚡
-            </div>
-            <div style="font-size:.7rem;color:#3F3F46;margin-top:3px;
-                        text-transform:uppercase;letter-spacing:.1em">
-                drop a doc. get answers.
+        <div style="padding: 0.25rem 0 1.25rem;">
+            <div style="font-size:1rem; font-weight:700; color:#F1F5F9;">DocTalk</div>
+            <div style="font-size:0.72rem; color:#475569; margin-top:2px;
+                        text-transform:uppercase; letter-spacing:0.08em;">
+                Document Q&A
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<span class="s-label">your files</span>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-label">Upload Documents</span>',
+                unsafe_allow_html=True)
 
     uploaded_files = st.file_uploader(
-        "drop pdfs here",
+        label="Upload PDFs",
         type=["pdf"],
         accept_multiple_files=True,
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        help="Upload one or more PDF files to start asking questions."
     )
 
     if uploaded_files:
-        st.markdown('<span class="s-label" style="margin-top:.8rem">in context</span>',
+        st.markdown('<span class="sidebar-label" style="margin-top:1rem;">Loaded</span>',
                     unsafe_allow_html=True)
         for f in uploaded_files:
-            name = f.name.replace(".pdf","").replace("_"," ")
+            name = f.name.replace(".pdf", "").replace("_", " ")
             st.markdown(
-                f'<div class="doc-pill"><span class="dot"></span>{name}</div>',
+                f'<div class="doc-tag"><span class="doc-tag-dot"></span>{name}</div>',
                 unsafe_allow_html=True
             )
 
-    st.markdown("<hr style='margin:1.2rem 0'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin:1.25rem 0'>", unsafe_allow_html=True)
+
     st.markdown("""
-        <div style="font-size:.76rem;color:#3F3F46;line-height:1.65">
-            answers come only from what you upload.<br>
-            nothing is stored after you close this tab.
+        <div style="font-size:0.77rem; color:#475569; line-height:1.6;">
+            Answers are generated exclusively from your uploaded documents.
+            No data is stored after your session ends.
         </div>
     """, unsafe_allow_html=True)
 
+    # Clear session button
     if st.session_state.get("messages"):
         st.markdown("<div style='margin-top:1rem'>", unsafe_allow_html=True)
-        if st.button("clear chat", use_container_width=True):
-            for k in ["messages","file_key","retriever","chain","doc_names"]:
-                st.session_state.pop(k, None)
+        if st.button("Clear conversation", use_container_width=True):
+            for key in ["messages", "file_key", "retriever", "chain", "doc_names"]:
+                st.session_state.pop(key, None)
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
 
-# ── Header ───────────────────────────────────────────────────────────
+# ── Main header ────────────────────────────────────────────────────────────────
 st.markdown("""
     <div class="app-header">
-        <span class="wordmark">DocTalk</span>
-        <span class="header-divider"></span>
-        <span class="tagline">upload any pdf — ask anything</span>
+        <span class="app-wordmark">DocTalk</span>
+        <span class="app-tagline">Upload any PDF &mdash; ask anything about it</span>
     </div>
 """, unsafe_allow_html=True)
 
 
-# ── No files state ───────────────────────────────────────────────────
+# ── States: no upload vs ready ─────────────────────────────────────────────────
 if not uploaded_files:
     st.markdown("""
-        <div class="empty-wrap">
-            <div class="empty-title">nothing here yet</div>
-            <div class="empty-sub">
-                drop a PDF in the sidebar and start asking questions.<br>
-                works on anything — books, contracts, policies, papers.
-            </div>
-            <div class="empty-examples">
-                <span class="example-chip">harry potter</span>
-                <span class="example-chip">terms & conditions</span>
-                <span class="example-chip">job offer letter</span>
-                <span class="example-chip">research paper</span>
-                <span class="example-chip">cricket rulebook</span>
-                <span class="example-chip">syllabus</span>
+        <div class="empty-state">
+            <div class="empty-state-title">No documents uploaded yet</div>
+            <div class="empty-state-sub">
+                Upload one or more PDF files from the sidebar to get started.<br>
+                Works with HR policies, research papers, legal contracts,<br>
+                product manuals — any text-based PDF.
             </div>
         </div>
     """, unsafe_allow_html=True)
     st.stop()
 
+# ── Build pipeline ─────────────────────────────────────────────────────────────
+with st.spinner("Processing documents..."):
+    retriever, chain, doc_names = build_pipeline_from_files(uploaded_files)
 
-# ── Build pipeline ───────────────────────────────────────────────────
-with st.spinner("reading your doc..."):
-    retriever, chain, doc_names = build_pipeline(uploaded_files)
-
-n = len(uploaded_files)
+n   = len(uploaded_files)
+label = f"{n} document loaded" if n == 1 else f"{n} documents loaded"
 st.markdown(f"""
-    <div class="status">
+    <div class="status-badge">
         <span class="status-dot"></span>
-        {n} doc{"s" if n > 1 else ""} loaded — ask away
+        {label} &mdash; ready
     </div>
 """, unsafe_allow_html=True)
 
 
-# ── Chat ─────────────────────────────────────────────────────────────
+# ── Chat ───────────────────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
-    names = ", ".join(doc_names[:2])
-    if len(doc_names) > 2:
-        names += f" +{len(doc_names)-2} more"
+    doc_list = ", ".join(doc_names[:3])
+    if len(doc_names) > 3:
+        doc_list += f" and {len(doc_names) - 3} more"
     st.session_state.messages = [{
         "role": "assistant",
-        "content": f"got **{names}**. what do you want to know?",
+        "content": (
+            f"I have processed **{doc_list}**. "
+            "Ask me anything about the content — I will answer only from what is in the documents."
+        ),
         "sources": []
     }]
 
+# Render history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         if msg.get("sources"):
-            with st.expander("sources"):
+            with st.expander("Sources"):
                 for s in msg["sources"]:
                     st.write(s)
 
-if prompt := st.chat_input("what do you want to know?"):
-    st.session_state.messages.append({"role":"user","content":prompt,"sources":[]})
+# Input
+if prompt := st.chat_input("Ask a question about your documents..."):
+    st.session_state.messages.append({"role": "user", "content": prompt, "sources": []})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("digging through your docs..."):
+        with st.spinner("Searching documents..."):
             answer, sources = ask(prompt, retriever, chain)
         st.markdown(answer)
         if sources:
-            with st.expander("sources"):
+            with st.expander("Sources"):
                 for s in sources:
                     st.write(s)
 
