@@ -32,9 +32,15 @@ st.markdown("""
 
 /* Centered constraints */
 .block-container {
-    max-width: 800px !important;
+    max-width: 1050px !important; /* Increased from 800px */
     padding: 2rem 2rem 4rem !important;
     margin: 0 auto !important;
+}
+
+/* Push the button in the 3rd column to the absolute right edge */
+[data-testid="column"]:nth-of-type(3) {
+    display: flex;
+    justify-content: flex-end;
 }
 
 /* Top Bar */
@@ -57,11 +63,19 @@ st.markdown("""
 .doc-badge {
     background: #F3F4F6;
     color: #4B5563;
-    padding: 4px 12px;
-    border-radius: 20px;
+    padding: 5px 10px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 500;
     border: 1px solid #E5E7EB;
+    width: 140px;
+    height: 32px;
+    line-height: 20px;
+    display: inline-block;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Hero Section (Upload State) */
