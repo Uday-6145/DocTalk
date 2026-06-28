@@ -23,11 +23,25 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Reset & Base */
-*, html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif !important;
+/* ── Reset & base (Safe font mapping to prevent icon breaking) ── */
+html, body, p, div, h1, h2, h3, h4, h5, h6, label, textarea, input, button {
+    font-family: 'Inter', -apple-system, sans-serif !important;
+}
+* {
+    box-sizing: border-box;
 }
 #MainMenu, footer, header { visibility: hidden; }
+
+/* ── Sources expander icon rendering patch ── */
+[data-testid="stExpander"] summary {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #71717A !important;
+}
+
 [data-testid="stSidebar"], [data-testid="collapsedControl"] { display: none !important; }
 
 /* Centered constraints */
