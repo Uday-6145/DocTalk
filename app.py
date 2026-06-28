@@ -13,7 +13,7 @@ from langchain_groq import ChatGroq
 
 st.set_page_config(
     page_title="DocTalk AI",
-    page_icon="✨",
+    page_icon="📑",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -103,12 +103,32 @@ st.markdown("""
     border-color: #3B82F6 !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
+
+/* 🚨 FIX FOR THE GLITCHED OVERLAPPING BUTTON TEXT 🚨 */
 [data-testid="stFileUploader"] button {
     background: #111827 !important;
-    color: white !important;
+    color: transparent !important; /* Hides the native glitched text */
     border-radius: 8px !important;
     font-weight: 500 !important;
     padding: 0.5rem 1rem !important;
+    position: relative !important;
+    border: none !important;
+    min-width: 120px !important;
+}
+
+/* Project clean custom text exactly in the center */
+[data-testid="stFileUploader"] button::after {
+    content: "Select PDF";
+    color: white !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.85rem !important;
+    width: 100% !important;
+    text-align: center !important;
 }
 
 /* Chat Messages */
