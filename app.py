@@ -304,25 +304,32 @@ retriever = st.session_state["retriever"]
 chain     = st.session_state["chain"]
 doc_names = st.session_state["doc_names"]
 
-# Top bar with current active docs
-badges = "".join(f'<span class="doc-badge">📄 {n}</span>' for n in doc_names)
-col1, col2 = st.columns([4, 1])
+# 3-Column Layout: Left (Logo), Center (Badges), Right (Button)
+col1, col2, col3 = st.columns([1.2, 4, 1.2])
+
 with col1:
-    st.markdown(f"""
-        <div class="top-bar" style="border: none; padding-bottom: 0;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span class="wordmark">DocTalk</span>
-                {badges}
-            </div>
+    st.markdown("""
+        <div style="height: 100%; display: flex; align-items: center; padding-top: 0.5rem;">
+            <span class="wordmark" style="font-size: 1.4rem;">DocTalk</span>
         </div>
     """, unsafe_allow_html=True)
+
 with col2:
+    # Added title="..." so users can hover to see the full name if it gets cut off
+    badges = "".join(f'<div class="doc-badge" title="{n}">📄 {n}</div>' for n in doc_names)
+    st.markdown(f"""
+        <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; padding-top: 0.3rem;">
+            {badges}
+        </div>
+    """, unsafe_allow_html=True)
+
+with col3:
     if st.button("Start New Session", use_container_width=True):
         for k in ["messages","file_key","retriever","chain","doc_names"]:
             st.session_state.pop(k, None)
         st.rerun()
 
-st.markdown("<hr style='margin: 1rem 0 2rem; border-color: rgba(0,0,0,0.08);'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 0.5rem 0 2rem; border-color: rgba(0,0,0,0.08);'>", unsafe_allow_html=True)
 
 # Welcome message
 if "messages" not in st.session_state:
