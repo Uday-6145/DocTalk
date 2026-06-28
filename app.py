@@ -12,264 +12,140 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 
 st.set_page_config(
-    page_title="DocTalk",
-    page_icon="◈",
+    page_title="DocTalk AI",
+    page_icon="✨",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
+# --- 🎨 MODERN SAAS UI THEME ---
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ── Reset & base ── */
+/* Reset & Base */
 *, html, body, [class*="css"] {
-    font-family: 'Inter', -apple-system, sans-serif !important;
-    box-sizing: border-box;
+    font-family: 'Inter', sans-serif !important;
 }
 #MainMenu, footer, header { visibility: hidden; }
+[data-testid="stSidebar"], [data-testid="collapsedControl"] { display: none !important; }
 
-/* ── Hide sidebar entirely (fixes the collapse bug) ── */
-[data-testid="stSidebar"]        { display: none !important; }
-[data-testid="collapsedControl"] { display: none !important; }
-
-/* ── Layout ── */
+/* Centered constraints */
 .block-container {
-    max-width: 860px !important;
-    padding: 0 2rem 4rem !important;
+    max-width: 800px !important;
+    padding: 2rem 2rem 4rem !important;
     margin: 0 auto !important;
 }
 
-/* ── Mono label style (sci-bot inspired) ── */
-.mono {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    color: #71717A;
-    text-transform: lowercase;
-}
-
-/* ── Top nav bar ── */
+/* Top Bar */
 .top-bar {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 1.4rem 0 1.2rem;
-    border-bottom: 1px solid rgba(0,0,0,0.07);
-    margin-bottom: 1.5rem;
+    align-items: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
 }
-.top-bar-left { display: flex; align-items: center; gap: 14px; }
 .wordmark {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #0E7490;
-    letter-spacing: -0.02em;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #111827, #374151);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
 }
 .doc-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(14,116,144,0.08);
-    border: 1px solid rgba(14,116,144,0.2);
-    color: #0E7490;
-    padding: 3px 10px;
-    border-radius: 4px;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.7rem;
-}
-.top-bar-right button {
-    background: none;
-    border: 1px solid rgba(0,0,0,0.12);
-    color: #71717A;
+    background: #F3F4F6;
+    color: #4B5563;
     padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 0.76rem;
-    cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
-}
-
-/* ── Upload state ── */
-.upload-page {
-    min-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-.upload-hero-label {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.7rem;
-    color: #0E7490;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 0.6rem;
-}
-.upload-hero-title {
-    font-size: 2.4rem;
-    font-weight: 600;
-    color: #18181B;
-    letter-spacing: -0.04em;
-    line-height: 1.15;
-    margin-bottom: 0.5rem;
-}
-.upload-hero-sub {
-    font-size: 0.9rem;
-    color: #71717A;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    max-width: 400px;
-}
-
-/* ── Scattered background symbols ── */
-.bg-symbols {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    z-index: 0;
-    font-family: 'JetBrains Mono', monospace;
-    color: rgba(14,116,144,0.06);
-    font-size: 1.4rem;
-    user-select: none;
-    overflow: hidden;
-}
-.bg-symbols span {
-    position: absolute;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 500;
+    border: 1px solid #E5E7EB;
 }
 
-/* ── Upload zone ── */
-.upload-zone-wrap { position: relative; z-index: 1; }
+/* Hero Section (Upload State) */
+.hero-container {
+    text-align: center;
+    padding: 4rem 0 3rem;
+}
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: #111827;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+.hero-title span {
+    background: linear-gradient(135deg, #0EA5E9, #2563EB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #6B7280;
+    max-width: 500px;
+    margin: 0 auto 3rem;
+    line-height: 1.5;
+}
+
+/* Uploader Styling */
 [data-testid="stFileUploader"] {
-    background: rgba(14,116,144,0.03) !important;
-    border: 1.5px dashed rgba(14,116,144,0.35) !important;
-    border-radius: 8px !important;
-    transition: border-color 0.2s, background 0.2s !important;
+    background: #FFFFFF !important;
+    border: 2px dashed #E5E7EB !important;
+    border-radius: 12px !important;
+    padding: 2rem !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 [data-testid="stFileUploader"]:hover {
-    background: rgba(14,116,144,0.06) !important;
-    border-color: rgba(14,116,144,0.6) !important;
+    border-color: #3B82F6 !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 [data-testid="stFileUploader"] button {
-    background: #0E7490 !important;
+    background: #111827 !important;
     color: white !important;
-    border: none !important;
-    border-radius: 5px !important;
-    font-size: 0.8rem !important;
-    font-family: 'JetBrains Mono', monospace !important;
-}
-[data-testid="stFileUploader"] small,
-[data-testid="stFileUploader"] p {
-    font-size: 0.8rem !important;
-    color: #71717A !important;
-    font-family: 'JetBrains Mono', monospace !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 1rem !important;
 }
 
-/* ── Example chips ── */
-.chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2rem; }
-.chip {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    padding: 5px 12px;
-    border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.1);
-    color: #52525B;
-    background: rgba(0,0,0,0.02);
-}
-.chip-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    color: #A1A1AA;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-}
-
-/* ── Chat messages ── */
+/* Chat Messages */
 [data-testid="stChatMessage"] {
-    border-radius: 6px !important;
-    border: 1px solid rgba(0,0,0,0.06) !important;
-    padding: 0.9rem 1rem !important;
-    margin-bottom: 0.5rem !important;
     background: transparent !important;
-}
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    border-left: 2px solid #0E7490 !important;
-    background: rgba(14,116,144,0.03) !important;
-}
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {
-    border-left: 2px solid rgba(0,0,0,0.08) !important;
+    border: none !important;
+    padding: 1rem 0 !important;
+    border-bottom: 1px solid rgba(0,0,0,0.05) !important;
 }
 [data-testid="stChatMessage"] p {
-    font-size: 0.9rem !important;
-    line-height: 1.65 !important;
-    color: #27272A !important;
+    color: #374151 !important;
+    line-height: 1.6 !important;
+    font-size: 0.95rem !important;
 }
 
-/* ── Input ── */
+/* Input Area */
 [data-testid="stChatInput"] {
-    border-radius: 6px !important;
-    border-color: rgba(0,0,0,0.1) !important;
+    border-radius: 12px !important;
+    border: 1px solid #E5E7EB !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
 }
 [data-testid="stChatInput"] textarea {
-    font-size: 0.88rem !important;
-    color: #18181B !important;
-}
-[data-testid="stChatInput"] textarea::placeholder {
-    color: #A1A1AA !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.82rem !important;
+    font-size: 0.95rem !important;
 }
 
-/* ── Sources expander ── */
-[data-testid="stExpander"] {
-    border: 1px solid rgba(0,0,0,0.06) !important;
-    border-radius: 5px !important;
-    margin-top: 0.4rem !important;
-}
-[data-testid="stExpander"] summary {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.68rem !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
-    color: #A1A1AA !important;
-}
-
-/* ── Spinner ── */
-[data-testid="stSpinner"] p {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.78rem !important;
-    color: #71717A !important;
-}
-
-/* ── Streamlit button (clear chat) ── */
-[data-testid="stBaseButton-secondary"] {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.75rem !important;
-    border-radius: 4px !important;
-    border-color: rgba(0,0,0,0.1) !important;
-    color: #71717A !important;
-}
-
-/* ── Dark mode ── */
+/* Dark Mode Overrides */
 @media (prefers-color-scheme: dark) {
-    .upload-hero-title { color: #F4F4F5; }
-    .chip { border-color: rgba(255,255,255,0.1); color: #A1A1AA; background: rgba(255,255,255,0.03); }
-    [data-testid="stChatMessage"] { border-color: rgba(255,255,255,0.06) !important; }
-    [data-testid="stChatMessage"] p { color: #E4E4E7 !important; }
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-        background: rgba(14,116,144,0.08) !important;
-    }
-    .upload-hero-title { color: #FAFAFA; }
-    .wordmark { color: #22D3EE; }
-    .bg-symbols { color: rgba(34,211,238,0.04); }
-    .doc-badge { background: rgba(34,211,238,0.1); border-color: rgba(34,211,238,0.2); color: #22D3EE; }
+    .hero-title { color: #F9FAFB; }
+    .wordmark { background: linear-gradient(90deg, #F9FAFB, #D1D5DB); -webkit-background-clip: text; }
+    .doc-badge { background: #1F2937; color: #D1D5DB; border-color: #374151; }
+    [data-testid="stFileUploader"] { background: #111827 !important; border-color: #374151 !important; }
+    [data-testid="stFileUploader"] button { background: #3B82F6 !important; }
+    [data-testid="stChatMessage"] p { color: #E5E7EB !important; }
+    [data-testid="stChatInput"] { border-color: #374151 !important; background: #1F2937 !important; }
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 # ── Helpers ───────────────────────────────────────────────────────────
 def get_api_key():
@@ -329,17 +205,17 @@ def build_pipeline(uploaded_files):
     )
 
     RAG_PROMPT = ChatPromptTemplate.from_messages([
-        ("system", """you are a precise document assistant.
-answer using only information found in the context below.
+        ("system", """You are an elite document intelligence assistant.
+Answer using ONLY information found in the context below.
 
-rules:
-1. answer directly — skip phrases like "according to the document" or "based on the context".
-2. include every exact number, date, name, or figure from the context.
-3. use bullet points for lists, steps, or conditions.
-4. if the answer isn't in the documents, say exactly: "not covered in your document."
-5. never guess or add outside information.
+RULES:
+1. Direct answers only. Skip "According to the document".
+2. Include exact numbers, dates, and figures.
+3. Use clean formatting (bullet points for lists).
+4. If the answer isn't in the documents, state: "I couldn't find that in the uploaded documents."
+5. Never hallucinate outside knowledge.
 
-context:
+Context:
 {context}"""),
         ("human", "{question}")
     ])
@@ -367,79 +243,34 @@ def ask(q, retriever, chain):
     return chain.invoke({"context": context, "question": q}), sources
 
 
+# ── Custom Avatars ──
+USER_AVATAR = "👤"
+BOT_AVATAR = "✨"
+
 # ══════════════════════════════════════════════════════════
 # STATE A — No document uploaded
 # ══════════════════════════════════════════════════════════
 if not st.session_state.get("file_key"):
-
-    # Minimal top wordmark
+    
     st.markdown("""
-        <div style="padding:1.4rem 0 0">
-            <span style="font-family:'JetBrains Mono',monospace;
-                         font-size:.9rem;font-weight:600;color:#0E7490;">
-                DocTalk
-            </span>
+        <div class="top-bar" style="border: none;">
+            <div class="wordmark">DocTalk</div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-title">Talk to your <span>documents.</span></div>
+            <div class="hero-subtitle">Upload PDFs, research papers, or contracts and extract answers instantly using Llama-3.</div>
         </div>
     """, unsafe_allow_html=True)
 
-    # Scattered background symbols
-    st.markdown("""
-    <div class="bg-symbols" aria-hidden="true">
-        <span style="top:8%;right:12%">{ }</span>
-        <span style="top:15%;right:28%">∑</span>
-        <span style="top:22%;right:6%">[ ]</span>
-        <span style="top:35%;right:18%">λ</span>
-        <span style="top:50%;right:8%">∂</span>
-        <span style="top:65%;right:22%">//</span>
-        <span style="top:75%;right:10%">→</span>
-        <span style="top:85%;right:30%">π</span>
-        <span style="top:12%;right:40%">≡</span>
-        <span style="top:60%;right:38%">∞</span>
-        <span style="top:42%;right:42%">&&</span>
-        <span style="top:28%;right:48%">Σ</span>
-        <span style="top:70%;right:45%">||</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Two-column layout: left = hero + upload, right = empty (for breathing room)
-    left, right = st.columns([1.1, 0.9])
-
-    with left:
-        st.markdown("""
-            <div style="padding:3.5rem 0 2rem">
-                <div class="upload-hero-label">document intelligence</div>
-                <div class="upload-hero-title">ask anything.<br>about any doc.</div>
-                <div class="upload-hero-sub">
-                    upload a pdf — research paper, policy, contract, book —
-                    and ask questions in plain english.
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-
-        uploaded_files = st.file_uploader(
-            "drop your pdf here",
-            type=["pdf"],
-            accept_multiple_files=True,
-            label_visibility="collapsed"
-        )
-
-        st.markdown("""
-            <div style="margin-top:2.5rem">
-                <div class="chip-label">works great with</div>
-                <div class="chip-row">
-                    <span class="chip">harry potter</span>
-                    <span class="chip">terms &amp; conditions</span>
-                    <span class="chip">offer letters</span>
-                    <span class="chip">research papers</span>
-                    <span class="chip">cricket rulebook</span>
-                    <span class="chip">college syllabus</span>
-                    <span class="chip">legal contracts</span>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+    uploaded_files = st.file_uploader(
+        "Upload PDF",
+        type=["pdf"],
+        accept_multiple_files=True,
+        label_visibility="collapsed"
+    )
 
     if uploaded_files:
-        with st.spinner("reading your document..."):
+        with st.spinner("Processing document embeddings..."):
             build_pipeline(uploaded_files)
         st.rerun()
 
@@ -453,63 +284,62 @@ retriever = st.session_state["retriever"]
 chain     = st.session_state["chain"]
 doc_names = st.session_state["doc_names"]
 
-# Top bar
-badges = "".join(
-    f'<span class="doc-badge">◈ {n}</span>' for n in doc_names
-)
-col1, col2 = st.columns([5, 1])
+# Top bar with current active docs
+badges = "".join(f'<span class="doc-badge">📄 {n}</span>' for n in doc_names)
+col1, col2 = st.columns([4, 1])
 with col1:
     st.markdown(f"""
-        <div class="top-bar">
-            <div class="top-bar-left">
+        <div class="top-bar" style="border: none; padding-bottom: 0;">
+            <div style="display: flex; align-items: center; gap: 12px;">
                 <span class="wordmark">DocTalk</span>
-                <span style="color:rgba(0,0,0,.15);font-size:.9rem">/</span>
                 {badges}
             </div>
         </div>
     """, unsafe_allow_html=True)
 with col2:
-    st.markdown("<div style='padding-top:1.3rem'>", unsafe_allow_html=True)
-    if st.button("↩ new document", use_container_width=True):
+    if st.button("Start New Session", use_container_width=True):
         for k in ["messages","file_key","retriever","chain","doc_names"]:
             st.session_state.pop(k, None)
         st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("<hr style='margin: 1rem 0 2rem; border-color: rgba(0,0,0,0.08);'>", unsafe_allow_html=True)
 
 # Welcome message
 if "messages" not in st.session_state:
-    names = " + ".join(doc_names[:2])
+    names = " & ".join(doc_names[:2])
     extra = f" + {len(doc_names)-2} more" if len(doc_names) > 2 else ""
     st.session_state.messages = [{
         "role": "assistant",
-        "content": f"**{names}{extra}** loaded. what do you want to know?",
+        "content": f"**{names}{extra}** successfully indexed. What would you like to know?",
         "sources": []
     }]
 
-# Chat history
+# Chat history rendering
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
+    avatar = BOT_AVATAR if msg["role"] == "assistant" else USER_AVATAR
+    with st.chat_message(msg["role"], avatar=avatar):
         st.markdown(msg["content"])
         if msg.get("sources"):
-            with st.expander("sources"):
+            with st.expander("View Sources"):
                 for s in msg["sources"]:
-                    st.markdown(f"`{s}`")
+                    st.markdown(f"- `{s}`")
 
-# Input
-if prompt := st.chat_input("ask anything about your document..."):
-    st.session_state.messages.append({"role":"user","content":prompt,"sources":[]})
-    with st.chat_message("user"):
+# Input Handling
+if prompt := st.chat_input("Ask a question about the document..."):
+    st.session_state.messages.append({"role":"user", "content":prompt, "sources":[]})
+    
+    with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"):
-        with st.spinner("searching..."):
+    with st.chat_message("assistant", avatar=BOT_AVATAR):
+        with st.spinner("Analyzing text..."):
             answer, sources = ask(prompt, retriever, chain)
         st.markdown(answer)
         if sources:
-            with st.expander("sources"):
+            with st.expander("View Sources"):
                 for s in sources:
-                    st.markdown(f"`{s}`")
+                    st.markdown(f"- `{s}`")
 
     st.session_state.messages.append({
-        "role":"assistant","content":answer,"sources":sources
+        "role":"assistant", "content":answer, "sources":sources
     })
